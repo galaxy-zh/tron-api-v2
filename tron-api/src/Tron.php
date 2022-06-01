@@ -1382,7 +1382,7 @@ class Tron implements TronInterface
      * 获取账户历史交易信息
      * 获取一个账户历史的转账记录，包括trc10&trc20转账和TRX转账
     */
-    public function get_accounts_transactions($address,$min_timestamp,$max_timestamp,$fingerprint='',$search_internal=true,$only_confirmed=true,$only_to=true,$limit=200,$order_by='block_timestamp,asc'){
+    public function get_accounts_transactions($address,$min_timestamp,$max_timestamp,$fingerprint='',$search_internal='true',$only_confirmed='true',$only_to='true',$limit=200,$order_by='block_timestamp,asc'){
         if (!is_string($address)) {
             throw new TronException('Invalid address provided');
         }
@@ -1404,7 +1404,7 @@ class Tron implements TronInterface
             'limit' => $limit,
             'order_by' => $order_by,
         ];
-        file_put_contents('url.log',"/v1/accounts/{$address}/transactions?".http_build_query($params));
-        return $this->manager->request("/v1/accounts/{$address}/transactions", $params,'get');
+        $params = http_build_query($params);
+        return $this->manager->request("/v1/accounts/{$address}/transactions?$params", [],'get');
     }
 }
