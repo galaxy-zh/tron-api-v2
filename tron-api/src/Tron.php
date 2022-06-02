@@ -1407,4 +1407,36 @@ class Tron implements TronInterface
         $params = http_build_query($params);
         return $this->manager->request("/v1/accounts/{$address}/transactions?$params", [],'get');
     }
+    
+     /**
+     * 获取账户历史交易信息
+     * 获取一个账户历史的转账记录，trc20转账
+     */
+    public function get_trx20_transactions($address, $min_timestamp, $max_timestamp, $contract_address = '', $fingerprint = '', $search_internal = 'true', $only_confirmed = 'true', $only_to = 'false', $limit = 200, $order_by = 'block_timestamp,asc')
+    {
+        if (!is_string($address)) {
+            throw new TronException('Invalid address provided');
+        }
+
+        if (empty($min_timestamp)) {
+            throw new TronException('Invalid min_timestamp provided');
+        }
+
+        if (empty($max_timestamp)) {
+            throw new TronException('Invalid max_timestamp provided');
+        }
+        $params = [
+            'min_timestamp' => $min_timestamp,
+            'max_timestamp' => $max_timestamp,
+            'search_internal' => $search_internal,
+            'fingerprint' => $fingerprint,
+            'only_confirmed' => $only_confirmed,
+            'only_to' => $only_to,
+            'limit' => $limit,
+            'order_by' => $order_by,
+            'contract_address' => $contract_address
+        ];
+        $params = http_build_query($params);
+        return $this->manager->request("/v1/accounts/{$address}/transactions/trc20?$params", [], 'get');
+    }
 }
