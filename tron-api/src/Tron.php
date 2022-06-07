@@ -677,7 +677,7 @@ class Tron implements TronInterface
      *
      * @throws TronException
      */
-    public function trx20SendTokenTransaction(string $to, string $amount, string $tokenAddress = null, string $unit = '6',string $from=null): array
+    public function trx20SendTokenTransaction(string $to, string $amount, string $tokenAddress = null, string $unit = '6', string $from = null): array
     {
         if (is_null($from)) {
             $from = $this->address['hex'];
@@ -685,11 +685,38 @@ class Tron implements TronInterface
         $to_address = $this->toHex($to); //收币用户
         $contract_address = $this->toHex($tokenAddress); //币合约地址
         $accment = web3Utils::toHex(web3Utils::toWei($amount, $unit)); //提币数量
-        $params = [$to_address, $accment];
+        $params = [substr($to_address, 2), $accment];
         $fee_limit = 300;
         $fee_limit = $this->toTron($fee_limit);
         $func = 'transfer(address,uint256)';
+        $transaction = $this->transactionBuilder->trc20_triggerSmartContract($contract_address, $func, $params, $from, $fee_limit);
+        $signedTransaction = $this->signTransaction($transaction);
 
+        $response = $this->sendRawTransaction($signedTransaction);
+
+        return array_merge($response, $signedTransaction);
+    }
+
+    /**
+     * Send trc20 token transaction to Blockchain.
+     *
+     * @param string $from 发起交易用户
+     *
+     * @throws TronException
+     */
+    public function trx20SendTokenFromTransaction(string $to, string $amount, string $tokenAddress = null, string $unit = '6', $approve_address, string $from = null): array
+    {
+        if (is_null($from)) {
+            $from = $this->address['hex'];
+        }
+        $to_address = $this->toHex($to); //收币用户
+        $approve_address = $this->toHex($approve_address); //出币用户
+        $contract_address = $this->toHex($tokenAddress); //币合约地址
+        $accment = web3Utils::toHex(web3Utils::toWei($amount, $unit)); //提币数量
+        $params = [substr($approve_address, 2), substr($to_address, 2), $accment];
+        $fee_limit = 300;
+        $fee_limit = $this->toTron($fee_limit);
+        $func = 'transferFrom(address,address,uint256)';
         $transaction = $this->transactionBuilder->trc20_triggerSmartContract($contract_address, $func, $params, $from, $fee_limit);
         $signedTransaction = $this->signTransaction($transaction);
 
