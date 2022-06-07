@@ -558,35 +558,34 @@ class TransactionBuilder
     }
 
     
-	public function trc20_triggerSmartContract($contract_address, $func, $params, $owner_address,$fee_limit,$call_value=0)
-	{
-		$trx = substr($params[0],2);
-		$num = $params[1];
-		$param_trx = str_pad($trx,64,'0',STR_PAD_LEFT);
-		$param_num = str_pad($num,64,'0',STR_PAD_LEFT);
-		$data = [
-			'owner_address'=>$owner_address,
-			'contract_address'=>$contract_address,
-			'function_selector'=>$func,
-			"fee_limit"=>$fee_limit,
-			'parameter'=>$param_trx.$param_num,
-		];
-		if($call_value > 0)
-		{
-			$data['call_value'] = $call_value;
-		}
+public function trc20_triggerSmartContract($contract_address, $func, $params, $owner_address, $fee_limit, $call_value = 0)
+    {
+        $parameter = [];
+        foreach ($params as $param) {
+            $parameter[] = str_pad($param, 64, '0', STR_PAD_LEFT);
+        }
+        $data = [
+            'owner_address' => $owner_address,
+            'contract_address' => $contract_address,
+            'function_selector' => $func,
+            "fee_limit" => $fee_limit,
+            'parameter' => join(',', $parameter),
+        ];
+        if ($call_value > 0) {
+            $data['call_value'] = $call_value;
+        }
         $result = $this->tron->getManager()->request('wallet/triggersmartcontract', $data);
-        if(!isset($result['result'])){
-            throw new TronException('No result field in response. Raw response:'.print_r($result,true));
+        if (!isset($result['result'])) {
+            throw new TronException('No result field in response. Raw response:' . print_r($result, true));
         }
 
-        if(isset($result['result']['result'])) {
+        if (isset($result['result']['result'])) {
             return $result['transaction'];
         }
 
         $message = isset($result['result']['message']) ?
-        $this->tron->hexString2Utf8($result['result']['message']) : '';
-        throw new TronException('Failed to execute. Error:'.$message);
-	}
+            $this->tron->hexString2Utf8($result['result']['message']) : '';
+        throw new TronException('Failed to execute. Error:' . $message);
+    }
 
 }
