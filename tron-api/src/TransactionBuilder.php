@@ -587,5 +587,33 @@ public function trc20_triggerSmartContract($contract_address, $func, $params, $o
             $this->tron->hexString2Utf8($result['result']['message']) : '';
         throw new TronException('Failed to execute. Error:' . $message);
     }
+    /*
+    *    合约静态调用
+    */
+    public function trc20_triggerconstantcontract($contract_address, $func, $params, $visible = false)
+    {
+        $parameter = [];
+        foreach ($params as $param) {
+            $parameter[] = str_pad($param, 64, '0', STR_PAD_LEFT);
+        }
+        $data = [
+            'owner_address' => '410000000000000000000000000000000000000000',
+            'contract_address' => $contract_address,
+            'function_selector' => $func,
+            'parameter' => join(',', $parameter),
+            "visible" => $visible,
+        ];
+        $result = $this->tron->getManager()->request('wallet/triggerconstantcontract', $data);
+        if (!isset($result['result'])) {
+            throw new TronException('No result field in response. Raw response:' . print_r($result, true));
+        }
 
+        if (isset($result['result']['result'])) {
+            return $result['transaction'];
+        }
+
+        $message = isset($result['result']['message']) ?
+            $this->tron->hexString2Utf8($result['result']['message']) : '';
+        throw new TronException('Failed to execute. Error:' . $message);
+    }
 }
