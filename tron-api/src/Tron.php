@@ -567,6 +567,23 @@ class Tron implements TronInterface
     }
 
     /**
+     * Get token balance. trc20
+     *
+     * @return array
+     *
+     * @throws TronException
+     */
+    public function getTrc20TokenBalance(string $address, string $tokenAddress, bool $fromTron = false)
+    {
+        $to_address = $this->toHex($address); //用户
+        $contract_address = $this->toHex($tokenAddress); //币合约地址
+        $params = [substr($to_address, 2)];
+        $func = 'balanceOf(address)';
+        $transaction = $this->transactionBuilder->trc20_triggerconstantcontract($contract_address, $func, $params);
+        return $transaction;
+    }
+    
+    /**
      * Query bandwidth information.
      *
      * @param $address
