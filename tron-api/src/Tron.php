@@ -565,7 +565,7 @@ class Tron implements TronInterface
 
         return 0;
     }
-
+    
     /**
      * Get token balance. trc20
      *
@@ -573,15 +573,30 @@ class Tron implements TronInterface
      *
      * @throws TronException
      */
-    public function getTrc20TokenBalance(string $address, string $tokenAddress, bool $fromTron = false)
+    public function getTrc20TokenBalance(string $address, string $tokenAddress)
     {
+        $fromAddress = $this->toHex($address); //用户
         $to_address = $this->toHex($address); //用户
         $contract_address = $this->toHex($tokenAddress); //币合约地址
         $params = [substr($to_address, 2)];
-        $func = 'balanceOf(address)';
-        $transaction = $this->transactionBuilder->trc20_triggerconstantcontract($contract_address, $func, $params);
+        $parameter = [];
+        foreach ($params as $param) {
+            $parameter[] = str_pad($param, 64, '0', STR_PAD_LEFT);
+        }
+        $params = [
+            "contract_address"  =>  $contract_address,
+            "owner_address"     =>  $fromAddress,
+            "function_selector" =>  "balanceOf(address)",
+            "parameter"         =>  join('', $parameter),
+            "call_value"        =>  0,
+            "fee_limit"         =>  1000000000,
+            "call_token_value"  =>  0,
+            "token_id"          =>  0
+        ];
+        $transaction = $this->manager->request('wallet/triggersmartcontract', $params);
         return $transaction;
     }
+
     
     /**
      * Query bandwidth information.
